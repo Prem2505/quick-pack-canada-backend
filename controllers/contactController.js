@@ -56,7 +56,9 @@ export const sendContactEmail = async (req, res) => {
       replyTo: email
     };
 
-    await transporter.sendMail(mailOptions);
+    // Use retry logic for better reliability
+    const { sendEmailWithRetry } = await import('../utils/emailUtils.js');
+    await sendEmailWithRetry(transporter, mailOptions, 2);
 
     res.status(200).json({ 
       success: true, 
