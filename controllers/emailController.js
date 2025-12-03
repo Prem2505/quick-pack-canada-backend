@@ -26,10 +26,17 @@ const createTransporter = () => {
   });
 };
 
+// Helper to get data from body or query
+const getData = (req) => {
+  // If body has data (POST), use it; otherwise use query (GET)
+  return Object.keys(req.body || {}).length > 0 ? req.body : req.query;
+};
+
 // Send contact form email
 export const sendContactEmail = async (req, res) => {
   try {
-    const { name, email, phone, message } = req.body;
+    const data = getData(req);
+    const { name, email, phone, message } = data;
 
     // Validate required fields
     if (!name || !email || !message) {
@@ -94,7 +101,8 @@ export const sendContactEmail = async (req, res) => {
 // Send order email
 export const sendOrderEmail = async (req, res) => {
   try {
-    const { 
+    const data = getData(req);
+    let { 
       orderType,
       productDetails,
       quantity,
@@ -106,7 +114,23 @@ export const sendOrderEmail = async (req, res) => {
       province,
       postalCode,
       additionalNotes
-    } = req.body;
+    } = data;
+
+    // Parse productDetails if it comes as a string from URL (GET request)
+    if (typeof productDetails === 'string') {
+      try {
+        productDetails = JSON.parse(productDetails);
+      } catch (e) {
+        // If parsing fails, try to construct from individual parameters
+        if (data.productSize) {
+          productDetails = {
+            size: data.productSize,
+            type: data.productType || 'pizza-box',
+            dimensions: data.dimensions || null
+          };
+        }
+      }
+    }
 
     // Validate required fields
     if (!name || !email || !phone || !address || !city || !province || !postalCode) {
