@@ -131,11 +131,26 @@ export const sendOrderEmail = async (req, res) => {
     });
   } catch (error) {
     console.error('Error sending order email:', error);
+    
+    // Handle specific error types
+    let errorMessage = 'Failed to submit order. Please try again later.';
+    
+    if (error.message === 'EMAIL_USER and EMAIL_PASS must be set in environment variables') {
+      errorMessage = 'Server configuration error. Please contact administrator.';
+    } else if (error.code === 'ETIMEDOUT' || error.code === 'ECONNREFUSED') {
+      errorMessage = 'Email service connection timeout. Please try again later or contact support.';
+      console.error('Connection error details:', {
+        code: error.code,
+        command: error.command,
+        message: error.message
+      });
+    } else if (error.responseCode) {
+      errorMessage = `Email service error: ${error.responseCode}. Please try again later.`;
+    }
+    
     res.status(500).json({ 
       success: false, 
-      message: error.message === 'EMAIL_USER and EMAIL_PASS must be set in environment variables' 
-        ? 'Server configuration error. Please contact administrator.' 
-        : 'Failed to submit order. Please try again later.' 
+      message: errorMessage 
     });
   }
 };

@@ -10,11 +10,26 @@ export const createTransporter = () => {
     throw new Error('EMAIL_USER and EMAIL_PASS must be set in environment variables');
   }
   
+  // Use explicit SMTP configuration with timeout settings for better reliability
   return nodemailer.createTransport({
-    service: 'gmail',
+    host: 'smtp.gmail.com',
+    port: 587,
+    secure: false, // true for 465, false for other ports
     auth: {
       user: process.env.EMAIL_USER,
       pass: process.env.EMAIL_PASS
+    },
+    // Connection timeout settings
+    connectionTimeout: 10000, // 10 seconds
+    greetingTimeout: 10000, // 10 seconds
+    socketTimeout: 10000, // 10 seconds
+    // Retry configuration
+    pool: true,
+    maxConnections: 1,
+    maxMessages: 3,
+    // Additional options for reliability
+    tls: {
+      rejectUnauthorized: false // Allow self-signed certificates if needed
     }
   });
 };
