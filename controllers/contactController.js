@@ -1,4 +1,4 @@
-import { createTransporter } from '../utils/emailUtils.js';
+import { createTransporter, sendEmailWithRetry } from '../utils/emailUtils.js';
 import { escapeHtml } from '../utils/helpers.js';
 import { isValidEmail, validateRequiredFields } from '../utils/validation.js';
 import { getRequestData } from '../utils/helpers.js';
@@ -57,7 +57,6 @@ export const sendContactEmail = async (req, res) => {
     };
 
     // Use retry logic for better reliability
-    const { sendEmailWithRetry } = await import('../utils/emailUtils.js');
     await sendEmailWithRetry(transporter, mailOptions, 2);
 
     res.status(200).json({ 
