@@ -136,14 +136,17 @@ export const sendOrderEmail = async (req, res) => {
     // Handle specific error types
     let errorMessage = 'Failed to submit order. Please try again later.';
     
-    if (error.message === 'EMAIL_USER and EMAIL_PASS must be set in environment variables') {
+    if (error.message.includes('No email service configured')) {
+      errorMessage = 'Email service not configured. Please set up SendGrid or Gmail credentials.';
+    } else if (error.message === 'EMAIL_USER and EMAIL_PASS must be set in environment variables') {
       errorMessage = 'Server configuration error. Please contact administrator.';
     } else if (error.code === 'ETIMEDOUT' || error.code === 'ECONNREFUSED') {
-      errorMessage = 'Email service connection timeout. Please try again later or contact support.';
+      errorMessage = 'Email service connection timeout. Gmail may be blocking connections. Consider using SendGrid for better reliability.';
       console.error('Connection error details:', {
         code: error.code,
         command: error.command,
-        message: error.message
+        message: error.message,
+        suggestion: 'Set SENDGRID_API_KEY in environment variables for reliable email delivery'
       });
     } else if (error.responseCode) {
       errorMessage = `Email service error: ${error.responseCode}. Please try again later.`;
