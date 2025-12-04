@@ -103,3 +103,4 @@ curl "https://quick-pack-canada-backend-1.onrender.com/api/contact?name=Test&ema
 2. **Test again** - Port 465 with SSL often works better
 3. **If still failing** - Switch to SendGrid or Resend (recommended for production)
 
+
